@@ -3,6 +3,7 @@ const { schemas } = require("../../models/contactModel");
 const { isValidBody, isValidId, authenticate } = require("../../middlewares");
 const {
   listContacts,
+  getFavorite,
   getContactById,
   addContact,
   removeContact,
@@ -13,6 +14,8 @@ const {
 const router = express.Router();
 
 router.get("/", authenticate, listContacts);
+
+router.get("/favorite", authenticate, getFavorite);
 
 router.get("/:contactId", authenticate, isValidId, getContactById);
 
