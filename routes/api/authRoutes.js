@@ -4,6 +4,7 @@ const {
   login,
   getCurrent,
   logout,
+  updateSubscription,
 } = require("../../controllers/auth");
 const { schemas } = require("../../models/userModel");
 const { isValidBody, authenticate } = require("../../middlewares");
@@ -21,5 +22,12 @@ router.post("/login", isValidBody(schemas.loginSchema), ctrlWrapper(login));
 router.get("/current", authenticate, ctrlWrapper(getCurrent));
 
 router.post("/logout", authenticate, ctrlWrapper(logout));
+
+router.patch(
+  "/users/:userId",
+  authenticate,
+  isValidBody(schemas.updateSchema),
+  ctrlWrapper(updateSubscription)
+);
 
 module.exports = router;

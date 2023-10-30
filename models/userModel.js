@@ -50,10 +50,17 @@ const loginSchema = Joi.object({
   email: Joi.string().pattern(emailRegexp).required(),
   password: Joi.string().min(6).required(),
 });
+const updateSchema = Joi.object({
+  name: Joi.string().min(3),
+  email: Joi.string().pattern(emailRegexp),
+  password: Joi.string().min(6),
+  subscription: Joi.string().valid("starter", "pro", "business"),
+});
 
 const schemas = {
   registerSchema,
   loginSchema,
+  updateSchema,
 };
 
 const User = model("user", userSchema);
