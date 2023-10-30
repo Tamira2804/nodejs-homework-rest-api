@@ -1,6 +1,6 @@
-const User = require("../../models/userModel");
+const { User } = require("../../models/userModel");
 const bcrypt = require("bcrypt");
-const requestError = require("../../helpers/requestError");
+const { requestError } = require("../../helpers");
 const jwt = require("jsonwebtoken");
 
 const { JWT_SECRET } = process.env;
@@ -18,7 +18,9 @@ const login = async (req, res, next) => {
   if (!isMatch) {
     throw requestError(401, "Password is not valid");
   }
+
   const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "1h" });
+  await User.findByIdAndUpdate(user._id, { token });
 
   res.status(200).json({ token });
 };
