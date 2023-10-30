@@ -1,7 +1,6 @@
 const express = require("express");
-const Joi = require("joi");
-const controllerWrap = require("../../helpers/controllerWrapper");
-const validate = require("../../middlewares/validationMiddleware");
+const { schemas } = require("../../models/contactModel");
+const { isValidBody, isValidId, authenticate } = require("../../middlewares");
 const {
   listContacts,
   getContactById,
@@ -13,37 +12,28 @@ const {
 
 const router = express.Router();
 
-const phonePattern = /^\(\d{3}\) \d{3}-\d{4}$/;
+router.get("/", authenticate, listContacts);
 
-const requiredSchema = Joi.object({
-  name: Joi.string().min(3).max(30).required(),
-  email: Joi.string().email().required(),
-  phone: Joi.string().pattern(phonePattern).required(),
-});
-const optionalSchema = Joi.object({
-  name: Joi.string().min(3).max(30),
-  email: Joi.string().email(),
-  phone: Joi.string().pattern(phonePattern),
-  favorite: Joi.boolean(),
-});
+router.get("/:contactId", authenticate, isValidId, getContactById);
 
-router.get("/", controllerWrap(listContacts));
+router.post("/", authenticate, isValidBody(schemas.requiredSchema), addContact);
 
-router.get("/:contactId", controllerWrap(getContactById));
-
-router.post("/", validate(requiredSchema), controllerWrap(addContact));
-
-router.delete("/:contactId", controllerWrap(removeContact));
+router.delete("/:contactId", authenticate, isValidId, removeContact);
 
 router.put(
   "/:contactId",
-  validate(optionalSchema),
-  controllerWrap(updateContact)
+  authenticate,
+  isValidId,
+  isValidBody(schemas.optionalSchema),
+  updateContact
 );
+
 router.patch(
   "/:contactId/favorite",
-  validate(optionalSchema),
-  controllerWrap(updateFavorite)
+  authenticate,
+  isValidId,
+  isValidBody(schemas.optionalSchema),
+  updateFavorite
 );
 
 module.exports = router;

@@ -1,4 +1,8 @@
 const { Schema, model } = require("mongoose");
+const { handleMongooseError } = require("../helpers");
+const Joi = require("joi");
+
+const phonePattern = /^\(\d{3}\) \d{3}-\d{4}$/;
 
 const contactSchema = new Schema(
   {
@@ -11,6 +15,7 @@ const contactSchema = new Schema(
     },
     phone: {
       type: String,
+      match: phonePattern,
     },
     favorite: {
       type: Boolean,
@@ -19,6 +24,7 @@ const contactSchema = new Schema(
     owner: {
       type: Schema.Types.ObjectId,
       ref: "user",
+      required: true,
     },
   },
   {
@@ -27,6 +33,29 @@ const contactSchema = new Schema(
   }
 );
 
+contactSchema.post("save", handleMongooseError);
+
+const requiredSchema = Joi.object({
+  name: Joi.string().min(3).max(30).required(),
+  email: Joi.string().email().required(),
+  phone: Joi.string().pattern(phonePattern).required(),
+  favorite: Joi.boolean(),
+});
+const optionalSchema = Joi.object({
+  name: Joi.string().min(3).max(30),
+  email: Joi.string().email(),
+  phone: Joi.string().pattern(phonePattern),
+  favorite: Joi.boolean(),
+});
+
+const schemas = {
+  requiredSchema,
+  optionalSchema,
+};
+
 const Contact = model("contact", contactSchema);
 
-module.exports = Contact;
+module.exports = {
+  Contact,
+  schemas,
+};
