@@ -1,49 +1,59 @@
 const express = require("express");
-const Joi = require("joi");
-const controllerWrap = require("../../helpers/controllerWrapper");
-const validate = require("../../middlewares/validationMiddleware");
+const { schemas } = require("../../models/contactModel");
+const { ctrlWrapper } = require("../../helpers");
 const {
-  listContacts,
-  getContactById,
-  addContact,
-  removeContact,
-  updateContact,
-  updateFavorite,
-} = require("../../controllers/contacts");
+  isValidBody,
+  isValidId,
+  authenticate,
+  checkOwner,
+} = require("../../middlewares");
+const ctrl = require("../../controllers/contacts");
 
 const router = express.Router();
 
-const phonePattern = /^\(\d{3}\) \d{3}-\d{4}$/;
+router.get("/", authenticate, ctrl.listContacts);
 
-const requiredSchema = Joi.object({
-  name: Joi.string().min(3).max(30).required(),
-  email: Joi.string().email().required(),
-  phone: Joi.string().pattern(phonePattern).required(),
-});
-const optionalSchema = Joi.object({
-  name: Joi.string().min(3).max(30),
-  email: Joi.string().email(),
-  phone: Joi.string().pattern(phonePattern),
-  favorite: Joi.boolean(),
-});
+router.get("/favorite", authenticate, ctrl.getFavorite);
 
-router.get("/", controllerWrap(listContacts));
+router.get(
+  "/:contactId",
+  authenticate,
+  ctrlWrapper(checkOwner),
+  isValidId,
+  ctrl.getContactById
+);
 
-router.get("/:contactId", controllerWrap(getContactById));
+router.post(
+  "/",
+  authenticate,
+  isValidBody(schemas.requiredSchema),
+  ctrl.addContact
+);
 
-router.post("/", validate(requiredSchema), controllerWrap(addContact));
-
-router.delete("/:contactId", controllerWrap(removeContact));
+router.delete(
+  "/:contactId",
+  authenticate,
+  ctrlWrapper(checkOwner),
+  isValidId,
+  ctrl.removeContact
+);
 
 router.put(
   "/:contactId",
-  validate(optionalSchema),
-  controllerWrap(updateContact)
+  authenticate,
+  ctrlWrapper(checkOwner),
+  isValidId,
+  isValidBody(schemas.optionalSchema),
+  ctrl.updateContact
 );
+
 router.patch(
   "/:contactId/favorite",
-  validate(optionalSchema),
-  controllerWrap(updateFavorite)
+  authenticate,
+  ctrlWrapper(checkOwner),
+  isValidId,
+  isValidBody(schemas.optionalSchema),
+  ctrl.updateFavorite
 );
 
 module.exports = router;

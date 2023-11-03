@@ -1,6 +1,6 @@
-const requestError = require("../helpers/requestError");
+const { requestError } = require("../helpers");
 
-const validationMiddleware = (schema) => {
+const isValidBody = (schema) => {
   const func = (req, res, next) => {
     const { error } = schema.validate(req.body);
     if (error) {
@@ -13,4 +13,4 @@ const validationMiddleware = (schema) => {
   return func;
 };
 
-module.exports = validationMiddleware;
+module.exports = isValidBody;
