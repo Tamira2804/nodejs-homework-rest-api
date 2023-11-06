@@ -10,6 +10,15 @@ router.post(
   isValidBody(schemas.registerSchema),
   user.registration
 );
+
+router.get("/verify/:verificationCode", user.verifyEmail);
+
+router.post(
+  "/verify",
+  isValidBody(schemas.emailSchema),
+  user.resendVerifyEmail
+);
+
 router.post("/login", isValidBody(schemas.loginSchema), user.login);
 
 router.get("/current", authenticate, user.getCurrent);
