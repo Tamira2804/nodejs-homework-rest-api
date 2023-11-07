@@ -11,7 +11,7 @@ router.post(
   user.registration
 );
 
-router.get("/verify/:verificationCode", user.verifyEmail);
+router.get("/verify/:verificationToken", user.verifyEmail);
 
 router.post(
   "/verify",
